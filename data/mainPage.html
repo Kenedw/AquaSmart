@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="pagina de login, usuario e senha">
+    <meta name="author" content="Kened Oliveira">
+
+    <title>AquaSmart</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./text/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="./text/floating-labels.css" rel="stylesheet">
+
+    <!-- apagar depois, botão toggle -->
+    <link href="./text/bootstrap-toggle.min.css" rel="stylesheet">
+    <!-- Custom script -->
+    <!-- apagar depois, botão toggle -->
+    <script src="./text/jquery-2.1.1.min.js"></script>
+    <script src="./text/bootstrap-toggle.min.js"></script>
+  </head>
+
+  <body>
+    <form class="form-signin">
+      <div class="text-center mb-4">
+        <img class="mb-4" src="./image/AquaSmart.png" alt="" width="278" height="200">
+
+      <!-- <div class='col-md-4'>
+        <button type='button submit' name='D8' value='1' class='btn btn-success btn-lg'>
+          ON</button></div>
+          <div class='col-md-4'>
+            <button type='button submit' name='D8' value='0' class='btn btn-danger btn-lg'>
+              OFF</button></div> -->
+
+      <!-- <div id="actions" class="row">
+        <div class="col-md-12">
+          <a href="edit.html" class="btn btn-primary">Editar</a>
+          <a href="index.html" class="btn btn-default">Fechar</a>
+        </div>
+      </div> -->
+      <!-- apagar depois, botão toggle -->
+
+<div class="checkbox">
+  <p>Tomada 1
+    <input type="checkbox" checked data-toggle="toggle"
+    name="T1" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
+    <button  class="btn btn-warning btn_info" type="submit">Editar</button>
+    <button  class="btn btn-info" type="submit">Agendar</button>
+
+  </p>
+</div>
+
+<div class="checkbox">
+  <p>Tomada 2
+    <input type="checkbox" id="t2" checked data-toggle="toggle"
+    name="T2" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
+    <button  class="btn btn-warning btn_info" type="submit">Editar</button>
+    <button  class="btn btn-info" type="submit">Agendar</button>
+    <div id="console-event"></div>
+  </p>
+  <script>
+  $(function() {
+    $('#t2').change(function() {
+      $('#console-event').html('Toggle: ' + $(this).prop('checked'))
+    })
+  })
+  </script>
+</div>
+
+<div class="checkbox">
+  <p>Tomada 3
+    <input type="checkbox" checked data-toggle="toggle"
+    name="T3" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
+    <button  class="btn btn-warning btn_info" type="submit">Editar</button>
+    <button  class="btn btn-info" type="submit">Agendar</button>
+
+  </p>
+</div>
+
+<div class="checkbox">
+  <p>Tomada 4
+    <input type="checkbox" checked data-toggle="toggle"
+    name="T4" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
+    <button  class="btn btn-warning btn_info" type="submit">Editar</button>
+    <button  class="btn btn-info" type="submit">Agendar</button>
+
+  </p>
+</div>
+<!-- usar btn-warning para o botão de editar -->
+<div class="label-primary">
+      </div>
+      <p class="mt-5 mb-3 text-muted text-center">© 2017-2018</p>
+    </form>
+
+</body></html>
