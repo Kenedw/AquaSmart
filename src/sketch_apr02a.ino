@@ -116,3 +116,8 @@ void apagaFiles(void)
   Serial.println("Apagou geral");
   ESP.restart();
 }
+
+void updateGPIO(int pin, bool state)
+{
+
+}
