@@ -2,9 +2,22 @@
 
 WiFiManager wifiManager;
 ESP8266WebServer server(80);
+String  etatGpio[4] = {"OFF","OFF","OFF","OFF"};
+const uint8_t GPIOUT[4] = {D5,D6,D7,D8};  //pinos que vão mudar o estado tomadas
+const uint8_t GPIOIN[4] = {D0,D1,D2,D3};  //pinos que vão verificar o estado das tomadas
 
 void setup(void)
 {
+  for ( int x = 0 ; x < 5 ; x++ )
+  {
+    pinMode(GPIOUT[x],OUTPUT);
+  }
+
+  for ( int x = 0 ; x < 5 ; x++ )
+  {
+    pinMode(GPIOIN[x],INPUT);
+  }
+
   delay(1000);
   Serial.begin(115200);
 
@@ -20,7 +33,8 @@ void setup(void)
   //Initialize Webserver
   server.on("/",handleRoot);
   server.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI
-
+  server.on("/mainPage",HTTP_GET,verificatomada);
+  server.on("/mainPage",HTTP_POST,modificatomada);
   server.on("/resetwifi",resetwifi);  // Chamada dos métodos de configuração
   server.on("/apagadado",apagaFiles);
   server.begin();
@@ -65,7 +79,7 @@ void handleAPorSTA(void)
   {
     Serial.println("failed to connect and hit timeout");
     //reset and try again, or maybe put it to deep sleep
-    ESP.restart();
+    wdt_reset();
     delay(1000);
   }
 }
@@ -107,17 +121,80 @@ void resetwifi(void)
 {
   wifiManager.resetSettings();
   Serial.println("Configuração do WiFi limpa");
-  ESP.restart();
+  wdt_reset();
 }
 
 void apagaFiles(void)
 {
   SPIFFS.format();
   Serial.println("Apagou geral");
-  ESP.restart();
+  wdt_reset();
 }
 
-void updateGPIO(int pin, bool state)
+void modificatomada(void)
 {
+  if( server.hasArg("T1") )
+  {
+    updateGPIO(0,server.arg("T1"));
+  }
+  else if ( server.hasArg("T2") )
+  {
+    updateGPIO(1,server.arg("T2"));
+  }
+  else if ( server.hasArg("T3") )
+  {
+    updateGPIO(2,server.arg("T3"));
+  }
+  else if ( server.hasArg("T4") )
+  {
+    updateGPIO(3,server.arg("T4"));
+  }
+  else
+  {
+    server.send ( 302, "text/html", "/mainPage.html" );
+  }
+}
 
+void updateGPIO(int gpio, String DxValue)
+{
+  Serial.println("");
+  Serial.println("Update GPIO ");
+  Serial.print(GPIOUT[gpio]);
+  Serial.print(" -> ");
+  Serial.println(DxValue);
+
+  if ( DxValue == "1" )
+  {
+    digitalWrite(GPIOUT[gpio], HIGH);
+    etatGpio[gpio] = "On";
+    Serial.println(gpio + etatGpio[gpio]);
+    server.send ( 302, "text/html", "/mainPage.html" );
+  }
+  else if ( DxValue == "0" )
+  {
+    digitalWrite(GPIOUT[gpio], LOW);
+    etatGpio[gpio] = "Off";
+    Serial.println(gpio + etatGpio[gpio]);
+    server.send ( 302, "text/html", "/mainPage.html" );
+  }
+  else
+  {
+    Serial.println("Erro valor incorreto");
+  }
+}
+
+void verificatomada(void)
+{
+  for(int i=0;i<5;i++)
+  {
+    if(digitalRead(GPIOIN[i])){
+      etatGpio[i] = "On";
+      Serial.println(etatGpio[i]);
+    }
+    else
+    {
+      etatGpio[i] = "Off";
+      Serial.println(etatGpio[i]);
+    }
+  }
 }

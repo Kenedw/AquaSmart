@@ -4,13 +4,16 @@ Kened Oliveira
 */
 #include <FS.h>   //Include File System Headers
 #include <ESP8266mDNS.h>
-#include <WiFiManager.h>
+#include "../lib/WiFiManager/WiFiManager.h"
 void configModeCallback (void);
 void handleAPorSTA      (void);
 bool loadFromSpiffs     (String path);
 void resetwifi          (void);
 void apagaFiles         (void);
-void updateGPIO         (int pin, bool state);
+void verificatomada     (void);
+void modificatomada     (void);
+void updateGPIO         (int gpio, String DxValue);
+
 
 
 /*
