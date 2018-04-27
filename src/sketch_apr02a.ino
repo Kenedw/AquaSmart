@@ -31,12 +31,28 @@ void setup(void)
   Serial.println(WiFi.localIP());
 
   //Initialize Webserver
-  server.on("/",handleRoot);
+  // server.on("/",handleRoot);
   server.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI
   server.on("/mainPage",HTTP_GET,verificatomada);
   server.on("/mainPage",HTTP_POST,modificatomada);
   server.on("/resetwifi",resetwifi);  // Chamada dos métodos de configuração
   server.on("/apagadado",apagaFiles);
+  server.on("/", HTTP_OPTIONS, []() {
+    server.sendHeader("Location", "/index.html",true);   //Redirect to our html web page
+    server.sendHeader("Access-Control-Max-Age", "10000");
+    server.sendHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    server.send(200, "text/plain", "" );
+  });
+
+server.on("/", HTTP_GET, []() {
+    String response ;
+    // ... some code to prepare the response data...
+    server.sendHeader("Location", "/index.html",true);   //Redirect to our html web page
+    server.sendHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    server.send(200, "text/plain", response.c_str() );
+  });
   server.begin();
 }
 
@@ -47,12 +63,12 @@ void loop(void)
 
 void handleRoot(void)
 {
-  server.sendHeader("Location", "/index.html",true);   //Redirect to our html web page
-  server.send(302, "text/plane","");
-
-  String login = server.arg("inputEmail");
-  String senha = server.arg("inputPassword");
-  Serial.println(login + "--" + senha);
+  // server.sendHeader("Location", "/index.html",true);   //Redirect to our html web page
+  // server.send(302, "text/plane","");
+  //
+  // String login = server.arg("inputEmail");
+  // String senha = server.arg("inputPassword");
+  // Serial.println(login + "--" + senha);
 }
 
 void handleWebRequests(void){
@@ -99,7 +115,7 @@ bool loadFromSpiffs(String path){
   else if(path.endsWith(".html")) dataType = "text/html";
   else if(path.endsWith(".htm")) dataType = "text/html";
   else if(path.endsWith(".css")) dataType = "text/css";
-  else if(path.endsWith(".js")) dataType = "application/javascript";
+  else if(path.endsWith(".js")) dataType = "text/javascript";
   else if(path.endsWith(".png")) dataType = "image/png";
   else if(path.endsWith(".svg")) dataType = "image/svg";
   else if(path.endsWith(".gif")) dataType = "image/gif";

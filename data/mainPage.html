@@ -9,19 +9,13 @@
 
     <!-- Bootstrap core CSS -->
     <link href="./text/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom styles for this template -->
-    <link href="./text/floating-labels.css" rel="stylesheet">
-
-    <!-- apagar depois, botão toggle -->
     <link href="./text/bootstrap-toggle.min.css" rel="stylesheet">
     <!-- Custom script -->
-    <!-- apagar depois, botão toggle -->
-    <script src="./text/jquery-2.1.1.min.js"></script>
+    <script src="./text/jquery.min.js"></script>
     <script src="./text/bootstrap-toggle.min.js"></script>
   </head>
 
-  <body>
+  <body style="background-color:#f2f2f2;">
     <form class="form" id="form">
       <div class="text-center mb-4">
         <img class="mb-4" src="./image/AquaSmart.png" alt="" width="278" height="200">
@@ -38,18 +32,15 @@
 <div class="checkbox">
   <p>
     <button  class="btn btn-outline-info" id="labelT2" type="button">Tomada 2</button>
-    <input type="checkbox" id="t2" checked data-toggle="toggle" name="T2" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
+    <input type="checkbox" id="t2" checked data-toggle="toggle" id="t2" name="T2" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
     <button  class="btn  btn-info" type="submit">Editar</button>
-    <button  id="btinfo" class="btn btn-info" type="submit">Agendar</button>
+    <button  class="btn btn-info" type="submit">Agendar</button>
   </p>
-
-<script>
-  </script>
 
 <div class="checkbox">
   <p>
     <button  class="btn btn-outline-info" id="labelT3" type="button">Tomada 3</button>
-    <input type="checkbox" checked data-toggle="toggle" name="T3" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
+    <input type="checkbox" checked data-toggle="toggle" id="t3" name="T3" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
     <button  class="btn btn-info " type="submit">Editar</button>
     <button  class="btn btn-info" type="submit">Agendar</button>
 
@@ -58,8 +49,8 @@
 
 <div class="checkbox">
   <p>
-    <button  class="btn btn-outline-info" id="labelT4" type="button">Tomada 4</button>
-    <input type="checkbox" checked data-toggle="toggle" name="T4" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
+    <button  class="btn btn-outline-info" type="button" id="labelT4" onclick="EnviaDados()" >Tomada 4</button>
+    <input type="checkbox" checked data-toggle="toggle"  id="t4"name="T4" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger" onclick="toggleT4()">
     <button  class="btn  btn-info" type="submit">Editar</button>
     <button  class="btn btn-info" type="submit">Agendar</button>
 
@@ -67,51 +58,66 @@
 </div>
 <!-- usar  para o botão de editar -->
 <div class="label-primary">
-  <button  class="btn btn-primary btn-lg btn-lg btn-block" type="submit">Gravar</button>
+  <a  class="btn btn-primary btn-lg btn-lg" href="/resetwifi">Resetar ESP</a>
+  <a class="btn btn-primary btn-lg btn-lg" href="/apagaTudo">Desligar Tudo</a>
       </div>
       <p class="mt-5 mb-3 text-muted text-center">© 2017-2018</p>
     </form>
 
 <script>
+// function getXmlHttpRequest() {
+// 	if (window.XMLHttpRequest) {
+// 		return new XMLHttpRequest();
+// 	} else if (window.ActiveXObject) {
+// 		return new ActiveXObject("Microsoft.XMLHTTP");
+// 	}
+// }
 
-  $(function() {
-    var delayInMilliseconds = 500; //1 second
-    setTimeout(function() {
-      if ($('#t1').prop('checked'))
-      {
-        $('#t1').bootstrapToggle('on')
-      }
-      else
-      {
-        $('#t1').bootstrapToggle('off')
-      }
-    }, delayInMilliseconds);
+$(function() {
+  $('#t2').change(function() {
+    if ($('#t2').prop('checked')) {
+      $('#t3').bootstrapToggle('on')
+    }
+    else {
+      $('#t3').bootstrapToggle('off')
+    }
   })
+})
 
-  $(function() {
-    var delayInMilliseconds = 500; //1 second
-    setTimeout(function() {
-      if ($('#t2').prop('checked'))
-      {
-        $('#t2').bootstrapToggle('on')
-      }
-      else
-      {
-        $('#t2').bootstrapToggle('off')
-      }
-    }, delayInMilliseconds);
-  })
 
-  function getQueryVariable(variable)
-  {
-         var query = window.location.search.substring(1);
-         var vars = query.split("&");
-         for (var i=0;i<vars.length;i++) {
-                 var pair = vars[i].split("=");
-                 if(pair[0] == variable){return pair[1];}
-         }
-         return(false);
+  function EnviaDados(){
+    if (window.XMLHttpRequest){
+      xmlhttp = new XMLHttpRequest();
+    }
+    else{
+      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    var dados = 't1=' + document.getElementById('t1').checked + "&t2=" + document.getElementById('t2').checked + "&t3=" + document.getElementById('t3').checked + "&t4=" + document.getElementById('t4').checked;
+    xmlhttp.open("POST", '#', true);
+    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xmlhttp.onreadystatechange = function(){
+      if (xmlhttp.readyState==4 && (xmlhttp.status == 200)) {
+    	  // var Recebe = xmlhttp.responseText.toString();
+       	// var resposta = xmlhttp.responseText;//document.getElementById("Resposta_da_ESP").innerHTML = xmlhttp.responseText;
+      }
+    }
+    xmlhttp.send(null);
   }
 
+
+  //
+  // $(function() {
+  //   var delayInMilliseconds = 500; //1 second
+  //   setTimeout(function() {
+  //     if ($('#t2').prop('checked'))
+  //     {
+  //       $('#t2').bootstrapToggle('on')
+  //     }
+  //     else
+  //     {
+  //       $('#t2').bootstrapToggle('off')
+  //     }
+  //   }, delayInMilliseconds);
+  // })
 </script>
 </body></html>
