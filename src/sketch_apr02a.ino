@@ -45,7 +45,7 @@ void setup(void)
     server.send(200, "text/plain", "" );
   });
 
-server.on("/", HTTP_GET, []() {
+  server.on("/", HTTP_GET, []() {
     String response ;
     // ... some code to prepare the response data...
     server.sendHeader("Location", "/index.html",true);   //Redirect to our html web page
@@ -58,7 +58,7 @@ server.on("/", HTTP_GET, []() {
 
 void loop(void)
 {
- server.handleClient();
+  server.handleClient();
 }
 
 void handleRoot(void)
