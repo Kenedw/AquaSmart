@@ -1,11 +1,4 @@
-#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
-
-//needed for library
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
-
-
+#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 
 void setup() {
   // put your setup code here, to run once:
@@ -20,7 +13,7 @@ void setup() {
   //sets timeout until configuration portal gets turned off
   //useful to make it all retry or go to sleep
   //in seconds
-  wifiManager.setTimeout(180);
+  wifiManager.setConfigPortalTimeout(180);
   
   //fetches ssid and pass and tries to connect
   //if it does not connect it starts an access point with the specified name
@@ -30,7 +23,7 @@ void setup() {
     Serial.println("failed to connect and hit timeout");
     delay(3000);
     //reset and try again, or maybe put it to deep sleep
-    ESP.reset();
+    ESP.restart();
     delay(5000);
   } 
 

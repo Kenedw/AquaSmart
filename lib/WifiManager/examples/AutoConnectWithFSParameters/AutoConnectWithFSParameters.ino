@@ -1,13 +1,10 @@
-#include <FS.h>                   //this needs to be first, or it all crashes and burns...
+#include <FS.h>          // this needs to be first, or it all crashes and burns...
+#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
+#include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
 
-#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
-
-//needed for library
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
-
-#include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
+#ifdef ESP32
+  #include <SPIFFS.h>
+#endif
 
 //define your default values here, if there are different values in config.json, they are overwritten.
 char mqtt_server[40];
@@ -74,13 +71,13 @@ void setup() {
   // After connecting, parameter.getValue() will get you the configured value
   // id/name placeholder/prompt default length
   WiFiManagerParameter custom_mqtt_server("server", "mqtt server", mqtt_server, 40);
-  WiFiManagerParameter custom_mqtt_port("port", "mqtt port", mqtt_port, 5);
-  WiFiManagerParameter custom_blynk_token("blynk", "blynk token", blynk_token, 32);
+  WiFiManagerParameter custom_mqtt_port("port", "mqtt port", mqtt_port, 6);
+  WiFiManagerParameter custom_blynk_token("blynk", "blynk token", "", 0);
 
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
-
+  
   //set config save notify callback
   wifiManager.setSaveConfigCallback(saveConfigCallback);
 
@@ -102,7 +99,7 @@ void setup() {
   //sets timeout until configuration portal gets turned off
   //useful to make it all retry or go to sleep
   //in seconds
-  //wifiManager.setTimeout(120);
+  //wifiManager.setConfigPortalTimeout(120);
 
   //fetches ssid and pass and tries to connect
   //if it does not connect it starts an access point with the specified name
@@ -112,7 +109,7 @@ void setup() {
     Serial.println("failed to connect and hit timeout");
     delay(3000);
     //reset and try again, or maybe put it to deep sleep
-    ESP.reset();
+    ESP.restart();
     delay(5000);
   }
 
