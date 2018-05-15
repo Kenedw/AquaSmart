@@ -13,6 +13,7 @@ void apagaFiles         (void);
 void verificatomada     (void);
 void modificatomada     (void);
 void updateGPIO         (int gpio, String DxValue);
+void alloff             (void);
 
 
 

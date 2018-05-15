@@ -16,14 +16,14 @@
   <script src="./text/bootstrap-toggle.min.js"></script>
 </head>
 
-<body style="background-color:#f2f2f2;">
+<body style="background-color:#f2f2f2;" onload="getData()">
   <form class="form" id="form">
     <div class="text-center mb-4">
       <img class="mb-4" src="./image/AquaSmart.png" alt="" width="278" height="200">
 
       <div class="checkbox">
         <p>
-          <button  class="btn btn-outline-info" id="labelT2" type="button">Tomada 1</button>
+          <button  class="btn btn-outline-info" id="labelT1" type="button">Tomada 1</button>
           <input   type="checkbox" checked data-toggle="toggle" id="t1" name="T1" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger"onchange="EnviaDados()">
           <button  class="btn btn-info" type="submit">Editar</button>
           <button  class="btn btn-info" type="submit">Agendar</button>
@@ -59,7 +59,7 @@
 
       <!-- usar  para o botão de editar -->
       <div class="label-primary">
-        <a class="btn btn-primary btn-lg" href="/apagaTudo">Desligar Tudo</a>
+        <button type="button" class="btn btn-primary btn-lg" onclick="alloff()">Desligar Tudo</button>
         <button  type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#confirm" >Resetar ESP</button>
         <div class="modal fade" id="confirm" role="dialog">
           <div class="modal-dialog modal-md">
@@ -89,39 +89,54 @@
 
     $(function() {
       $('#t2').change(function() {
-        if ($('#t2').prop('checked')) {
-          $('#t3').bootstrapToggle('on')
-        }
-        else {
-          $('#t3').bootstrapToggle('off')
-        }
+        getData();
       })
     })
+
+    // $(function() {
+    //   $('#t2').change(function() {
+    //     if ($('#t2').prop('checked')) {
+    //       $('#t3').bootstrapToggle('on')
+    //     }
+    //     else {
+    //       $('#t3').bootstrapToggle('off')
+    //     }
+    //   })
+    // })
 
 
     function EnviaDados(){
       var xmlhttp = newXmlHttpRequest();
       var dados = 't1=' + document.getElementById('t1').checked + "&t2=" + document.getElementById('t2').checked + "&t3=" + document.getElementById('t3').checked + "&t4=" + document.getElementById('t4').checked;
-      xmlhttp.onreadystatechange = function(){
-        if (xmlhttp.readyState==4 && (xmlhttp.status == 200)) {
-          // var Recebe = xmlhttp.responseText.toString();
-          // var resposta = xmlhttp.responseText;//document.getElementById("Resposta_da_ESP").innerHTML = xmlhttp.responseText;
-        }
-      }
+      xmlhttp.onreadystatechange = function(){}
       xmlhttp.open("GET", 'setTomadas?' + dados, true);
+      xmlhttp.send();
+    }
+
+    function alloff(){
+      var xmlhttp = newXmlHttpRequest();
+      xmlhttp.onreadystatechange = function(){}
+      xmlhttp.open("GET", 'alloff');
       xmlhttp.send();
     }
 
     setInterval(function() {
       // Call a function repetatively with 10 Second interval
       getData();
-    }, 10000); //10000mSeconds update rate
+    }, 30000); //10000mSeconds update rate
 
     function getData() {
       var xhttp = newXmlHttpRequest();
       xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
           var resposta = xmlhttp.responseText;//document.getElementById("Resposta_da_ESP").innerHTML = xmlhttp.responseText;
+          var Tid;
+          var i;
+          for(i = 1 ;i<=length(Resposta) ;i++ ){
+            Tid = 't';
+            Tid += i;
+            $(Tid).bootstrapToggle(resposta[i-1]?'on':'off');
+          }
         }
       };
       xhttp.open("GET", "callback", true);
