@@ -2,6 +2,7 @@
 Kened Oliveira
 04/04/2018
 */
+#include <ESP8266mDNS.h>
 #include <FS.h>   //Include File System Headers
 #include <ESP8266mDNS.h>
 #include "../lib/WiFiManager/WiFiManager.h"
@@ -43,3 +44,8 @@ void handleAPorSTA      (void);
 //   IPAddress ip;
 //   IPAddress gateway;
 // } WifiConfig;
+// #ifdef ESP8266MDNS_H
+//   if(MDNS.begin("AquaSmart")){
+//     MDNS.addService("http", "tcp", 80);
+//   }
+// #endif
