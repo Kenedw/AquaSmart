@@ -1,0 +1,46 @@
+.btn-custom {
+	/* padding: 1px 15px 3px 2px; */
+	border-radius: 50px;
+  position: relative;
+  left: 160px;
+  background-color:#f2f2f2;
+  box-shadow:0 0 0 0rem !important;
+}
+
+.img-custom {
+  width: 35px;
+}
+
+.app-background {
+  background-color:#f2f2f2;
+}
+
+.rodape {
+  position:absolute;
+  bottom:0;
+  width:100%;
+  margin-top: 10px;
+}
+
+.justo {
+  padding-right: 2px;
+  padding-left: 2px;
+}
+
+/*  Ocultando e deichando componentes invisiveis*/
+.show {
+  display: block !important;
+}
+.hidden {
+  display: none !important;
+  visibility: hidden !important;
+}
+.invisible {
+  visibility: hidden;
+}
+.temp-square {
+	font-size: 2.5rem;
+	font-family: sans-serif;
+	color: #0B243B;
+	padding: 5px;
+}
