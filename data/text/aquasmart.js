@@ -30,7 +30,12 @@ function alloff(){
 setInterval(function() {
   // Call a function repetatively with 10 Second interval
   getData();
-}, 30000); //10000mSeconds update rate
+}, 30000); //30Seconds update rate
+
+setInterval(function() {
+  // Call a function repetatively with 10 Second interval
+  DemoMode();
+}, 60000); //60Seconds update rate
 
 function getData() {
   var xhttp = newXmlHttpRequest();
@@ -49,7 +54,21 @@ function getData() {
   xhttp.open("GET", "callback", true);
   xhttp.send();
 }
-
+function DemoMode(){
+  var x = Math.floor((Math.random() * 10) )/10;
+  if(FlagDemo){
+    console.log("1");
+    console.log(x);
+    document.getElementById("labelTemp").innerHTML = parseFloat(+document.getElementById('labelTemp').innerHTML + x);
+    document.getElementById("labelPH").innerHTML = parseFloat(+document.getElementById('labelTemp').innerHTML - x);
+  }
+  else{
+    console.log("2");
+    console.log(x);
+    document.getElementById("labelTemp").innerHTML = parseFloat(+document.getElementById('labelTemp').innerHTML - x);
+    document.getElementById("labelPH").innerHTML = parseFloat(+document.getElementById('labelTemp').innerHTML + x);
+  }
+}
 var start=0;
 function editLabel(idLabel,idform) {
   // --[Mudança de estado por toggle]--

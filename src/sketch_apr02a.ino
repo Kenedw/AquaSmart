@@ -4,7 +4,11 @@ WiFiManager wifiManager;
 ESP8266WebServer server(80);
 #define  nomeHost  "AquaSmart"
 String  etatGpio[4] = {"off","off","off","off"};
-const uint8_t GPIOUT[4] = {D5,D6,D7,D8};  //pinos que vão mudar o estado tomadas
+bool  flag_button = false;
+const uint8_t GPIOUT[4] = {D5,D6,1,3};  //pinos que vão mudar o estado tomadas
+const uint8_t GPIIN[4] = {D0,D2,D7,D8};
+unsigned long time=0;
+
 // const uint8_t GPIOIN[4] = {D0,D1,D2,D3};  //pinos que vão verificar o estado das tomadas
 //==============================================================
 //                  SETUP
@@ -12,6 +16,8 @@ const uint8_t GPIOUT[4] = {D5,D6,D7,D8};  //pinos que vão mudar o estado tomada
 int pinCLK = D1; //saida
 int pinSH = D3;  //saida
 int pinDADO = D4;//Entrada
+int INFOPINOUT[4]={0,0,0,0};//acumulador de informações
+
 void setup(void){
 
   //definir pinos de saida
@@ -19,29 +25,34 @@ void setup(void){
   pinMode(GPIOUT[1],OUTPUT);
   pinMode(GPIOUT[2],OUTPUT);
   pinMode(GPIOUT[3],OUTPUT);
-
-  //definir pinos de entrada
   pinMode(pinCLK,OUTPUT);
   pinMode(pinSH,OUTPUT);
+
+  //definir pinos de entrada
   pinMode(pinDADO,INPUT);
+  pinMode(GPIIN[0],INPUT);
+  pinMode(GPIIN[1],INPUT);
+  pinMode(GPIIN[2],INPUT);
+  pinMode(GPIIN[3],INPUT);
+
 
   digitalWrite(pinSH,HIGH); //da enable
   digitalWrite(pinCLK,HIGH); //da enable
 
   delay(1000);
-  Serial.begin(115200);
+  // //serial.begin(115200);
 
   //Initialize File System
   SPIFFS.begin();
-  Serial.println("File System Initialized");
+  //serial.println("File System Initialized");
 
   //Nome do hostname
   wifiManager.setHostname(nomeHost);
 
   //Initialize
   handleAPorSTA();
-  Serial.print("meu IP:");
-  Serial.println(WiFi.localIP());
+  ////serial.print("meu IP:");
+  ////serial.println(WiFi.localIP());
 
   //Initialize Webserver
   server.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI
@@ -67,6 +78,12 @@ void setup(void){
     server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     server.send(302, "text/plain", response.c_str() );
   });
+
+  for(int i=0;i<5;i++){
+    if(digitalRead(GPIIN[i])!=INFOPINOUT[i]){
+      INFOPINOUT[i]=!INFOPINOUT[i];
+    }
+  }
   server.begin();
 }
 
@@ -75,6 +92,16 @@ void setup(void){
 //==============================================================
 void loop(void){
   server.handleClient();
+  if((millis()-time) >= 50){//requisita a cada 1 segundo
+    for(int i=0;i<5;i++){
+      if(digitalRead(GPIIN[i])!=INFOPINOUT[i]){
+        INFOPINOUT[i]=!INFOPINOUT[i];
+        digitalWrite(GPIOUT[i],INFOPINOUT[i]);
+        flag_button = true;
+      }
+    }
+    time += millis();
+  }
 }
 
 void handleRoot(void){
@@ -96,22 +123,22 @@ void handleWebRequests(void){
     message += " NAME:"+server.argName(i) + "\n VALUE:" + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  Serial.println(message);
+  ////serial.println(message);
 }
 
 void handleAPorSTA(void){
   wifiManager.setAPCallback(configModeCallback);
   if(!wifiManager.autoConnect(nomeHost,"123456789")){
-    Serial.println("failed to connect and hit timeout");
+    //serial.println("failed to connect and hit timeout");
     //reset and try again, or maybe put it to deep sleep
     wdt_reset();
   }
 }
 
 void configModeCallback (WiFiManager *wifiManager){
-  Serial.println("Entered config mode");
-  Serial.println(WiFi.softAPIP());
-  Serial.println(wifiManager->getConfigPortalSSID());
+  //serial.println("Entered config mode");
+  //serial.println(WiFi.softAPIP());
+  //serial.println(wifiManager->getConfigPortalSSID());
 }
 
 bool loadFromSpiffs(String path){
@@ -141,18 +168,18 @@ bool loadFromSpiffs(String path){
 
 void resetwifi(void){
   wifiManager.resetSettings();
-  Serial.println("Configuração do WiFi limpa");
+  //serial.println("Configuração do WiFi limpa");
   wdt_reset();
 }
 
 void apagaFiles(void){
   SPIFFS.format();
-  Serial.println("Apagou geral");
+  //serial.println("Apagou geral");
   wdt_reset();
 }
 
 void alloff(void){
-  Serial.println("Apagando tomadas ");
+  //serial.println("Apagando tomadas ");
   String aux = "";
   String aux2 = "t";
   for(int i=1;i<=4;i++){
@@ -164,7 +191,7 @@ void alloff(void){
 }
 
 void setTomadas(void){
-  Serial.println("Setando tomadas ");
+  //serial.println("Setando tomadas ");
   String aux = "";
   String aux2 = "t";
 
@@ -174,15 +201,14 @@ void setTomadas(void){
       updateGPIO(i-1,server.arg(aux));
     }
   }
-
   server.send ( 200, "text/html", "/mainPage.html" );
 }
 
 void updateGPIO(int gpio, String statePin){
-  Serial.print("Update GPIO: ");
-  Serial.print(GPIOUT[gpio]);
-  Serial.print(" -> ");
-  Serial.println(statePin);
+  //serial.print("Update GPIO: ");
+  //serial.print(GPIOUT[gpio]);
+  //serial.print(" -> ");
+  //serial.println(statePin);
   digitalWrite(GPIOUT[gpio],statePin == "true" ? HIGH : LOW);
 }
 
@@ -190,57 +216,30 @@ void updateGPIO(int gpio, String statePin){
 // int pinSH = D3;//saida
 // int pinDADO = D4;
 void verificatomada(void){
-  int8_t nT = 4;
+  int8_t nT = 4,aux;
   String result = "";
+
+  if(flag_button){
+    for(int i=0;i<5;i++){
+      result += INFOPINOUT[i];
+    }
+    flag_button = false;
+    //serial.print("medida nova -> ");
+    //serial.println(result);
+    server.send ( 200, "text/html", result);
+    return;
+  }
   digitalWrite(pinSH,LOW); //clock em 0
   digitalWrite(pinSH,HIGH); //clock em 0
 
   for(int8_t i = 0; i < nT; i++){
     digitalWrite(pinCLK,LOW); //clock em 0
     digitalWrite(pinCLK,HIGH); //clock em 1
-    result += digitalRead(pinDADO);
+    aux = digitalRead(pinDADO);
+    result += aux;
+    INFOPINOUT[i] = aux;
   }
-  // digitalWrite(pinCLK,LOW); //clock em 0
-  // // Serial.print(digitalRead(pinDADO));
-  // result += digitalRead(pinDADO);
-  //
-  // digitalWrite(pinCLK,HIGH); //clock em 0
-  // digitalWrite(pinCLK,LOW); //clock em 0
-  // // Serial.print(digitalRead(pinDADO));
-  // result += digitalRead(pinDADO);
-  //
-  // digitalWrite(pinCLK,HIGH); //clock em 0
-  // digitalWrite(pinCLK,LOW); //clock em 0
-  // // Serial.print(digitalRead(pinDADO));
-  // result += digitalRead(pinDADO);
-  //
-  // digitalWrite(pinCLK,HIGH); //clock em 0
-  // digitalWrite(pinCLK,LOW); //clock em 0
-  // // Serial.print(digitalRead(pinDADO));
-  // result += digitalRead(pinDADO);
-
-  // digitalWrite(pinCLK,HIGH); //clock em 0
-  // digitalWrite(pinCLK,LOW); //clock em 0
-  // // Serial.print(digitalRead(pinDADO));
-  // result += digitalRead(pinDADO);
-  //
-  // digitalWrite(pinCLK,HIGH); //clock em 0
-  // digitalWrite(pinCLK,LOW); //clock em 0
-  // // Serial.print(digitalRead(pinDADO));
-  // result += digitalRead(pinDADO);
-  //
-  // digitalWrite(pinCLK,HIGH); //clock em 0
-  // digitalWrite(pinCLK,LOW); //clock em 0
-  // // Serial.print(digitalRead(pinDADO));
-  // result += digitalRead(pinDADO);
-  //
-  // digitalWrite(pinCLK,HIGH); //clock em 0
-  // digitalWrite(pinCLK,LOW); //clock em 0
-  // // Serial.println(digitalRead(pinDADO));
-  // result += digitalRead(pinDADO);
-  //
-  Serial.print("medida nova -> ");
-  Serial.println(result);
+  //serial.print("medida nova -> ");
+  //serial.println(result);
   server.send ( 200, "text/html", result);
-
 }
