@@ -4,8 +4,11 @@ WiFiManager wifiManager;
 ESP8266WebServer server(80);
 #define  nomeHost  "AquaSmart"
 String  etatGpio[4] = {"off","off","off","off"};
-const uint8_t GPIOUT[4] = {D5,D6,D7,D8};  //pinos que vão mudar o estado tomadas
-int   hora_rele[4]=[]
+bool  flag_button = false;
+int hora_releaux[19];
+const uint8_t GPIOUT[4] = {D5,D6,1,3};  //pinos que vão mudar o estado tomadas
+const uint8_t GPIIN[4] = {D0,D2,D7,D8};
+unsigned long time=0;
 // const uint8_t GPIOIN[4] = {D0,D1,D2,D3};  //pinos que vão verificar o estado das tomadas
 //WiFiUDP ntpUDP;
 
@@ -35,43 +38,50 @@ void sendNTPpacket(IPAddress &address);
 int pinCLK = D1; //saida
 int pinSH = D3;  //saida
 int pinDADO = D4;//Entrada
+int INFOPINOUT[4]={0,0,0,0};//acumulador de informações
 void setup(void){
 
   //definir pinos de saida
+ //definir pinos de saida
   pinMode(GPIOUT[0],OUTPUT);
   pinMode(GPIOUT[1],OUTPUT);
   pinMode(GPIOUT[2],OUTPUT);
   pinMode(GPIOUT[3],OUTPUT);
-
-  //definir pinos de entrada
   pinMode(pinCLK,OUTPUT);
   pinMode(pinSH,OUTPUT);
+
+  //definir pinos de entrada
   pinMode(pinDADO,INPUT);
+  pinMode(GPIIN[0],INPUT);
+  pinMode(GPIIN[1],INPUT);
+  pinMode(GPIIN[2],INPUT);
+  pinMode(GPIIN[3],INPUT);
+
 
   digitalWrite(pinSH,HIGH); //da enable
   digitalWrite(pinCLK,HIGH); //da enable
 
   delay(1000);
-  Serial.begin(115200);
+  //Serial.begin(115200);
 
   Udp.begin(localPort);
-  Serial.print("Local port: ");
-  Serial.println(Udp.localPort());
-  Serial.println("waiting for sync");
+  //Serial.print("Local port: ");
+  //Serial.println(Udp.localPort());
+  //Serial.println("waiting for sync");
   setSyncProvider(getNtpTime);
   setSyncInterval(300);
   
   //Initialize File System
   SPIFFS.begin();
-  Serial.println("File System Initialized");
+  //Serial.println("File System Initialized");
 
   //Nome do hostname
   wifiManager.setHostname(nomeHost);
 
   //Initialize
   handleAPorSTA();
-  Serial.print("meu IP:");
-  Serial.println(WiFi.localIP());
+  //Serial.print("meu IP:");
+  //Serial.println(WiFi.localIP());
   
   //Initialize Webserver
   server.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI
@@ -79,9 +89,9 @@ void setup(void){
   server.on("/callback",verificatomada);
   server.on("/alloff",alloff);
   server.on("/setTomadas",setTomadas);
+  server.on("/agendados",setAgendamento);
   server.on("/resetwifi",resetwifi);  // Chamada dos métodos de configuração
   server.on("/apagadado",apagaFiles);
-  server.on("/mainPage", agendaTime);//do agendamento
   server.on("/mainPage", HTTP_OPTIONS, []() {
     server.sendHeader("Location", "/mainPage",true);   //Redirect to our html web page
     server.sendHeader("Access-Control-Max-Age", "10000");
@@ -90,7 +100,7 @@ void setup(void){
     server.send(302, "text/plain", "" );
   });
 
-  server.on("/mainPage", HTTP_GET, []() {
+ server.on("/mainPage", HTTP_GET, []() {
     String response ;
     // ... some code to prepare the response data...
     server.sendHeader("Location", "/mainPage",true);   //Redirect to our html web page
@@ -98,6 +108,14 @@ void setup(void){
     server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     server.send(302, "text/plain", response.c_str() );
   });
+
+  for(int i=0;i<5;i++){
+    if(digitalRead(GPIIN[i])!=INFOPINOUT[i]){
+      INFOPINOUT[i]=!INFOPINOUT[i];
+    }
+  }
+
+  
   server.begin();
 
   //timeClient.begin();
@@ -110,6 +128,20 @@ time_t prevDisplay = 0; // quando o relógio digital foi exibido
 //==============================================================
 void loop(void){
   server.handleClient();
+
+    if((millis()-time) >= 50){//requisita a cada 1 segundo
+    for(int i=0;i<5;i++){
+      if(digitalRead(GPIIN[i])!=INFOPINOUT[i]){
+        INFOPINOUT[i]=!INFOPINOUT[i];
+        digitalWrite(GPIOUT[i],INFOPINOUT[i]);
+        flag_button = true;
+      }
+    }
+    time += millis();
+  }
+
+
+  
    if (timeStatus() != timeNotSet) {
     if (now() != prevDisplay) { // atualiza a exibição somente se o tempo tiver mudado
       prevDisplay = now();
@@ -138,22 +170,22 @@ void handleWebRequests(void){
     message += " NAME:"+server.argName(i) + "\n VALUE:" + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  Serial.println(message);
+  ////serial.println(message);
 }
 
 void handleAPorSTA(void){
   wifiManager.setAPCallback(configModeCallback);
   if(!wifiManager.autoConnect(nomeHost,"123456789")){
-    Serial.println("failed to connect and hit timeout");
+    //serial.println("failed to connect and hit timeout");
     //reset and try again, or maybe put it to deep sleep
     wdt_reset();
   }
 }
 
 void configModeCallback (WiFiManager *wifiManager){
-  Serial.println("Entered config mode");
-  Serial.println(WiFi.softAPIP());
-  Serial.println(wifiManager->getConfigPortalSSID());
+  //serial.println("Entered config mode");
+  //serial.println(WiFi.softAPIP());
+  //serial.println(wifiManager->getConfigPortalSSID());
 }
 
 bool loadFromSpiffs(String path){
@@ -183,62 +215,76 @@ bool loadFromSpiffs(String path){
 
 void resetwifi(void){
   wifiManager.resetSettings();
-  Serial.println("Configuração do WiFi limpa");
+  //serial.println("Configuração do WiFi limpa");
   wdt_reset();
 }
+
+//set agendamentos da funcao EnviaAgendamentos javascript
+void setAgendamento(void){
+  //Serial.println("Recebendo valores agendados");
+  String aux = "";
+  String aux2 = "t";
+
+  for(int i=1;i<=16;i++){
+    aux = aux2 + i;
+    if(server.hasArg(aux){
+      hora_releaux[i] = hora_releaux[serve.arg(aux)];
+    }
+}
+
 //agendamentos sendo comparados
 void agendaTime(void){
    //condicionais de ligar//*****************************
-   if (hour() == hora_rele1 && minute() == min_rele1)
+   if (hour() == hora_releaux[1] && minute() == hora_releaux[2])
    {
-      digitalWrite(D1, 0);//Acende
+      digitalWrite(D1, 1);//Acende
    }
 
-   if (hour() == hora_rele2 && minute() == min_rele2)
+   if (hour() == hora_releaux[3] && minute() == hora_releaux[4])
    {
-      digitalWrite(D2, 0);//Acende
+      digitalWrite(D2, 1);//Acende
    }
 
-   if (hour() == hora_rele3 && minute() == min_rele3)
+   if (hour() == hora_releaux[5] && minute() == hora_releaux[6])
    {
-      digitalWrite(D3, 0);//Acende
+      digitalWrite(D3, 1);//Acende
    }
 
-   if (hour() == hora_rele4 && minute() == min_rele4)
+   if (hour() == hora_releaux[7] && minute() == hora_releaux[8])
    {
-      digitalWrite(D4, 0);//Acende
+      digitalWrite(D4, 1);//Acende
    }
    
   //condicionais de desligamento//***************************
-   if (hour() == hora_rele11 && minute() == min_rele11)
+   if (hour() ==  hora_releaux[9] && minute() == hora_releaux[10])
    {
-      digitalWrite(D1, 1);//desliga
+      digitalWrite(D1, 0);//desliga
    }
 
-   if (hour() == hora_rele22 && minute() == min_rele22)
+   if (hour() ==  hora_releaux[11] && minute() == hora_releaux[12])
    {
-      digitalWrite(D2, 1);//desliga
+      digitalWrite(D2, 0);//desliga
    }
 
-   if (hour() == hora_rele33 && minute() == min_rele33)
+   if (hour() ==  hora_releaux[13] && minute() == hora_releaux[14])
    {
-      digitalWrite(D3, 1);//desliga
+      digitalWrite(D3, 0);//desliga
    }
 
-    if (hour() == hora_rele44 && minute() == min_rele44)
+    if (hour() ==  hora_releaux[15] && minute() == hora_releaux[16])
    {
-      digitalWrite(D4, 1);//desliga
+      digitalWrite(D4, 0);//desliga
    }
 }
 
 void apagaFiles(void){
   SPIFFS.format();
-  Serial.println("Apagou geral");
+ // Serial.println("Apagou geral");
   wdt_reset();
 }
 
 void alloff(void){
-  Serial.println("Apagando tomadas ");
+  //serial.println("Apagando tomadas ");
   String aux = "";
   String aux2 = "t";
   for(int i=1;i<=4;i++){
@@ -250,7 +296,7 @@ void alloff(void){
 }
 
 void setTomadas(void){
-  Serial.println("Setando tomadas ");
+  //serial.println("Setando tomadas ");
   String aux = "";
   String aux2 = "t";
 
@@ -260,46 +306,35 @@ void setTomadas(void){
       updateGPIO(i-1,server.arg(aux));
     }
   }
-
-
   server.send ( 200, "text/html", "/mainPage.html" );
 }
-//set agendamentos da funcao EnviaAgendamentos javascript
-void setAgendamento(void){
-  Serial.println("Recebendo valores agendados");
-  String aux = "";
-  String aux2 = "t";
 
-  for(int i=1;i<=16;i++){
-    aux = aux2 + i;
-    if(server.hasArg(aux){
-      hora_releaux
-    }
-}
+
+
 
 //funcao que printa na serial o horario NTC
 void digitalClockDisplay()
 {
   // digital clock display of the time
-  Serial.print(hour());
-  printDigits(minute());
-  printDigits(second());
-  Serial.print(" ");
-  Serial.print(day());
-  Serial.print(".");
-  Serial.print(month());
-  Serial.print(".");
-  Serial.print(year());
-  Serial.println();
+  //Serial.print(hour());
+  //printDigits(minute());
+ // printDigits(second());
+  //Serial.print(" ");
+  //Serial.print(day());
+ // Serial.print(".");
+  //Serial.print(month());
+ // Serial.print(".");
+  //Serial.print(year());
+  //Serial.println();
 }
 
 void printDigits(int digits)
 {
   // utility for digital clock display: prints preceding colon and leading 0
-  Serial.print(":");
-  if (digits < 10)
-    Serial.print('0');
-  Serial.print(digits);
+  //Serial.print(":");
+ // if (digits < 10)
+    //Serial.print('0');
+  //Serial.print(digits);
 }
 
 /*-------- NTP code ----------*/
@@ -311,18 +346,18 @@ time_t getNtpTime()
   IPAddress ntpServerIP; // NTP server's ip address
 
   while (Udp.parsePacket() > 0) ; //descartar quaisquer pacotes recebidos anteriormente 
-  Serial.println("Transmit NTP Request");
+  //Serial.println("Transmit NTP Request");
   // get a random server from the pool
   WiFi.hostByName(ntpServerName, ntpServerIP);
-  Serial.print(ntpServerName);
-  Serial.print(": ");
-  Serial.println(ntpServerIP);
+  //Serial.print(ntpServerName);
+  //Serial.print(": ");
+  //Serial.println(ntpServerIP);
   sendNTPpacket(ntpServerIP);
   uint32_t beginWait = millis();
   while (millis() - beginWait < 1500) {
     int size = Udp.parsePacket();
     if (size >= NTP_PACKET_SIZE) {
-      Serial.println("Receive NTP Response");
+      //Serial.println("Receive NTP Response");
       Udp.read(packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
       unsigned long secsSince1900;
       // convert four bytes starting at location 40 to a long integer
@@ -333,7 +368,7 @@ time_t getNtpTime()
       return secsSince1900 - 2208988800UL + timeZone * SECS_PER_HOUR;
     }
   }
-  Serial.println("No NTP Response :-(");
+  //Serial.println("No NTP Response :-(");
   return 0; // return 0 if unable to get the time
 }
 
@@ -360,10 +395,10 @@ void sendNTPpacket(IPAddress &address)
   Udp.endPacket();
 }
 void updateGPIO(int gpio, String statePin){
-  Serial.print("Update GPIO: ");
-  Serial.print(GPIOUT[gpio]);
-  Serial.print(" -> ");
-  Serial.println(statePin);
+  //serial.print("Update GPIO: ");
+  //serial.print(GPIOUT[gpio]);
+  //serial.print(" -> ");
+  //serial.println(statePin);
   digitalWrite(GPIOUT[gpio],statePin == "true" ? HIGH : LOW);
 }
 
@@ -371,19 +406,30 @@ void updateGPIO(int gpio, String statePin){
 // int pinSH = D3;//saida
 // int pinDADO = D4;
 void verificatomada(void){
-  int8_t nT = 4;
+  int8_t nT = 4,aux;
   String result = "";
+
+  if(flag_button){
+    for(int i=0;i<5;i++){
+      result += INFOPINOUT[i];
+    }
+    flag_button = false;
+    //serial.print("medida nova -> ");
+    //serial.println(result);
+    server.send ( 200, "text/html", result);
+    return;
+  }
   digitalWrite(pinSH,LOW); //clock em 0
   digitalWrite(pinSH,HIGH); //clock em 0
 
   for(int8_t i = 0; i < nT; i++){
     digitalWrite(pinCLK,LOW); //clock em 0
     digitalWrite(pinCLK,HIGH); //clock em 1
-    result += digitalRead(pinDADO);
+    aux = digitalRead(pinDADO);
+    result += aux;
+    INFOPINOUT[i] = aux;
   }
-
-  Serial.print("medida nova -> ");
-  Serial.println(result);
+  //serial.print("medida nova -> ");
+  //serial.println(result);
   server.send ( 200, "text/html", result);
-
 }
