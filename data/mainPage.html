@@ -1,96 +1,241 @@
 <!DOCTYPE html>
-<html lang="pt"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="pt">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="pagina de login, usuario e senha">
-    <meta name="author" content="Kened Oliveira">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="pagina de login, usuario e senha">
+  <meta name="author" content="Kened Oliveira", "Caio Assunção">
 
-    <title>AquaSmart</title>
+  <title>AquaSmart</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="./text/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap core CSS -->
+  <link href="./text/bootstrap.min.css" rel="stylesheet">
+  <link href="./text/bootstrap-toggle.min.css" rel="stylesheet">
+  <link href="./text/ajustfine.css" rel="stylesheet">
+  <!-- Custom script -->
+  <script src="./text/jquery.min.js"></script>
+  <script src="./text/popper.min.js"></script>
+  <script src="./text/bootstrap.bundle.min.js"></script>
+  <script src="./text/bootstrap-toggle.min.js"></script>
+  <script src="./text/aquasmart.js"></script>
+</head>
+<body class="app-background text-center mb-4" onload="getData()">
 
-    <!-- Custom styles for this template -->
-    <link href="./text/floating-labels.css" rel="stylesheet">
+  <img class="mb-4" src="./image/AquaSmart.png" alt="" width="278" height="200"></img>
+  <div class="menu-tomadas" onfocusout="hideforms()">
+    <div class="checkbox">
+      <p>
+        <button  class="btn btn-outline-info" onclick="editLabel(labelT1,formT1)"   type="button">
+          <div id="labelT1">
+            Tomada 1
+          </div>
+          <input type="text" class="form hidden" id="formT1">
+        </button>
+        <input   type="checkbox" checked data-toggle="toggle" id="t1" name="T1" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="secondary" onchange="EnviaDados()">
+        <button  class="btn btn-info" type="submit">Editar</button>
 
-    <!-- apagar depois, botão toggle -->
-    <link href="./text/bootstrap-toggle.min.css" rel="stylesheet">
-    <!-- Custom script -->
-    <!-- apagar depois, botão toggle -->
-    <script src="./text/jquery-2.1.1.min.js"></script>
-    <script src="./text/bootstrap-toggle.min.js"></script>
-  </head>
 
-  <body>
-    <form class="form-signin">
-      <div class="text-center mb-4">
-        <img class="mb-4" src="./image/AquaSmart.png" alt="" width="278" height="200">
+        <!--comeco do modal padrao para todos os agendamentos-->
+        <button type="submit" class="btn btn-info" id="modal1" name="MODAL-1"data-toggle="modal" data-target=".bd-example-modal-sm">Agendar</button>
 
-      <!-- <div class='col-md-4'>
-        <button type='button submit' name='D8' value='1' class='btn btn-success btn-lg'>
-          ON</button></div>
-          <div class='col-md-4'>
-            <button type='button submit' name='D8' value='0' class='btn btn-danger btn-lg'>
-              OFF</button></div> -->
+      <div class="modal fade bd-example-modal-sm" tabindex="-1" id="mod1" name="MOD-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+         <div class="modal-header">
+            <h3 class="modal-title" id="exampleModalCenterTitle">Agendamento</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+             
+      <p align="middle">
+	
+        <strong class="rele1">TOMADA 1</strong><br>
+      </p>
 
-      <!-- <div id="actions" class="row">
-        <div class="col-md-12">
-          <a href="edit.html" class="btn btn-primary">Editar</a>
-          <a href="index.html" class="btn btn-default">Fechar</a>
-        </div>
-      </div> -->
-      <!-- apagar depois, botão toggle -->
+      <p align="middle">
+    
+    <br>
+      <!--os inputs relacionados ao agendamento-->
+	  <input type="number" min="00" max="23" class="input" class ="liga_rele1AHORA" >
+	  <input type="number" min="00" max="59" class="input" class ="liga_rele1AMIN" >
+	  <strong> | </strong>
+      <input type="number" min="00" max="23" class="input" class="desliga_rele1AHORA">
+	  <input type="number" min="00" max="59" class="input" class="desliga_rele1AMIN">
+	  <br>
+	  <br>  
+      <br>  
+		  
+	  <buttom onclick="EnviaAgendamento()" class="btn btn-primary" >Agendar</buttom>
+      
+  <!--continua o modal com os inputs para 2 tomada -->
+  	<p align="middle">
+       <strong>---------------------------------</strong><br>
+       <strong class="rele2">TOMADA 2</strong><br>
+      </p>
+    
+      
+    <br>
+	  
+      <input type="number" min="00" max="23" class="input" class ="liga_rele2AHORA" >
+	  <input type="number" min="00" max="59" class="input" class ="liga_rele2AMIN" >
+	  <strong> | </strong>
+      <input type="number" min="00" max="23" class="input" class="desliga_rele2AHORA">
+	  <input type="number" min="00" max="59" class="input" class="desliga_rele2AMIN">
+	  <br>
+	  <br>  
+      <br>
+			  
+	  <buttom onclick="EnviaAgendamento()" class="btn btn-primary">Agendar</buttom>
+      
+	<!--continua o modal com os inputs para 3 tomada -->		  
+ 	<p align="middle">
+        <strong>---------------------------------</strong><br>
+        <strong class="rele3">TOMADA 3</strong><br> 
+      </p>
+      
+    <br>
+      <input type="number" min="00" max="23" class="input" class ="liga_rele3AHORA" >
+	  <input type="number" min="00" max="59" class="input" class ="liga_rele3AMIN" >
+	  <strong> | </strong>
+      <input type="number" min="00" max="23" class="input" class="desliga_rele3AHORA">
+	  <input type="number" min="00" max="59" class="input" class="desliga_rele3AMIN">
+	  <br><br>
+    
+	 <br>
 
-<div class="checkbox">
-  <p>Tomada 1
-    <input type="checkbox" checked data-toggle="toggle"
-    name="T1" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
-    <button  class="btn btn-warning btn_info" type="submit">Editar</button>
-    <button  class="btn btn-info" type="submit">Agendar</button>
-
-  </p>
-</div>
-
-<div class="checkbox">
-  <p>Tomada 2
-    <input type="checkbox" id="t2" checked data-toggle="toggle"
-    name="T2" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
-    <button  class="btn btn-warning btn_info" type="submit">Editar</button>
-    <button  class="btn btn-info" type="submit">Agendar</button>
-    <div id="console-event"></div>
-  </p>
-  <script>
-  $(function() {
-    $('#t2').change(function() {
-      $('#console-event').html('Toggle: ' + $(this).prop('checked'))
-    })
-  })
-  </script>
-</div>
-
-<div class="checkbox">
-  <p>Tomada 3
-    <input type="checkbox" checked data-toggle="toggle"
-    name="T3" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
-    <button  class="btn btn-warning btn_info" type="submit">Editar</button>
-    <button  class="btn btn-info" type="submit">Agendar</button>
-
-  </p>
-</div>
-
-<div class="checkbox">
-  <p>Tomada 4
-    <input type="checkbox" checked data-toggle="toggle"
-    name="T4" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="danger">
-    <button  class="btn btn-warning btn_info" type="submit">Editar</button>
-    <button  class="btn btn-info" type="submit">Agendar</button>
-
-  </p>
-</div>
-<!-- usar btn-warning para o botão de editar -->
-<div class="label-primary">
+	  <buttom onclick="EnviaAgendamento()" class="btn btn-primary">Agendar</buttom>
+  
+     <!--continua o modal com os inputs para 4 tomada -->
+    <p align="middle">
+        <strong>---------------------------------</strong><br>
+        <strong class="rele4">TOMADA 4</strong><br> 
+      </p>
+     
+    <br>
+      <input type="number" min="00" max="23" class="input" class ="liga_rele4AHORA" >
+	  <input type="number" min="00" max="59" class="input" class ="liga_rele4AMIN" >
+	  <strong> | </strong>
+      <input type="number" min="00" max="23" class="input" class="desliga_rele4AHORA">
+	  <input type="number" min="00" max="59" class="input" class="desliga_rele4AMIN">
+	  <br>
+	  <br>  
+  
+	<br>	  
+      <buttom onclick="EnviaAgendamento()" class="btn btn-primary">Agendar</buttom>
+		
+    </p>
+    
       </div>
-      <p class="mt-5 mb-3 text-muted text-center">© 2017-2018</p>
-    </form>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--fim modal geral -->
+	  
+      </p>
+    </div>
+<!--comeca a 2 linha de botoes -->
+    <div class="checkbox">
+      <p>
+        <button class="btn btn-outline-info" onclick="editLabel(labelT2,formT2)" type="button">
+          <div id="labelT2">
+            Tomada 2
+          </div>
+          <input type="text" class="form hidden" id="formT2">
+        </button>
+		  
+        <input   type="checkbox" checked data-toggle="toggle" id="t2" name="T2" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="secondary"onchange="EnviaDados()">
+        <button  class="btn btn-info" type="submit">Editar</button>
 
-</body></html>
+<!--comeco do modal-->
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-info" id="modal2" name="MODAL-2" data-toggle="modal" data-target=".bd-example-modal-sm">Agendar</button>
+
+<!--fim modal-->
+  
+  </p>
+      </p>
+    </div>
+<!--comeca a 3 linha de botoes -->
+    <div class="checkbox">
+      <p>
+        <button  class="btn btn-outline-info" onclick="editLabel(labelT3,formT3)" type="button">
+          <div id="labelT3">
+            Tomada 3
+          </div>
+          <input type="text" class="form hidden" id="formT3">
+        </button>
+        <input   type="checkbox" checked data-toggle="toggle" id="t3" name="T3" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="secondary"onchange="EnviaDados()">
+        <button  class="btn btn-info " type="submit">Editar</button>
+
+        <!--comeco do modal-->
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-info" id="modal3" name="MODAL-3" data-toggle="modal" data-target=".bd-example-modal-sm">Agendar</button>
+
+		<!--fim modal-->
+
+  </p>
+      </p>
+    </div>
+<!--comeca a 4 linha de botoes -->
+    <div class="checkbox">
+      <p>
+        <button class="btn btn-outline-info" onclick="editLabel(labelT4,formT4)" type="button" >
+          <div id="labelT4">
+            Tomada 4
+          </div>
+          <input type="text" class="form hidden" id="formT4">
+        </button>
+        <input   type="checkbox" checked data-toggle="toggle"  id="t4"name="T4" data-on="Ligado" data-off="Desligado" data-onstyle="success" data-offstyle="secondary" onchange="EnviaDados()">
+        <button  class="btn  btn-info" type="submit">Editar</button>
+
+
+        <!--comeco do modal-->
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-info" id="modal4" name="MODAL-4" data-toggle="modal" data-target=".bd-example-modal-sm">Agendar</button>
+
+<!--fim modal-->
+
+      </p>
+    </div>
+  </div>
+    <div>
+      <p style="margin-bottom:0px;">
+        Temperatura
+      </p>
+      <span class=" temp-square border border-info rounded">
+        35&degC
+      </span>
+    </div>
+    <!--  botão dropdown, para opções-->
+    <div class="btn-group dropleft">
+      <button type="button" class="btn dropdown-toggle btn-custom" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <img src="./image/op.png" class="img-custom"><img/>
+      </button>
+
+      <div class="dropdown-menu">
+        <a class=" dropdown-item" onclick="alloff()" >Desligar Tudo</a>
+        <a class=" dropdown-item" onclick="alloff()" >Reiniciar</a>
+        <a class=" dropdown-item" data-toggle="modal" data-target="#confirm" >Restaurar</a>
+      </div>
+    </div>
+    <div class="modal fade" id="confirm" role="dialog">
+      <div class="modal-dialog modal-md">
+        <div class="modal-content">
+          <div class="modal-body"><p> Esta opção, reiniciara o seu sistema, fazendo com que tenha que entrar
+            novamente com os dados de usuario e configurações de wifi, Tem certeza que deseja continuar?</p>
+          </div>
+          <div class="modal-footer">
+            <a href="/resetwifi" class="btn btn-danger">Sim</a>
+            <button type="button" data-dismiss="modal" class="btn btn-default">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<p class="mt-5 mb-3 rodape text-muted text-center">AquaSmart© 2018</p>
+</html>

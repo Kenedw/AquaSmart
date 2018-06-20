@@ -2,15 +2,25 @@
 Kened Oliveira
 04/04/2018
 */
+#include <ESP8266mDNS.h>
 #include <FS.h>   //Include File System Headers
 #include <ESP8266mDNS.h>
-#include <WiFiManager.h>
+#include "WiFiManager.h"
+#include "WifiUdp.h"
+#include "ESP8266WiFi.h"
+#include "NTPClient.h"
+#include <TimeLib.h>
+
 void configModeCallback (void);
 void handleAPorSTA      (void);
 bool loadFromSpiffs     (String path);
 void resetwifi          (void);
 void apagaFiles         (void);
-void updateGPIO         (int pin, bool state);
+void verificatomada     (void);
+void modificatomada     (void);
+void updateGPIO         (int gpio, String DxValue);
+void alloff             (void);
+
 
 
 /*
@@ -39,3 +49,8 @@ void handleAPorSTA      (void);
 //   IPAddress ip;
 //   IPAddress gateway;
 // } WifiConfig;
+// #ifdef ESP8266MDNS_H
+//   if(MDNS.begin("AquaSmart")){
+//     MDNS.addService("http", "tcp", 80);
+//   }
+// #endif

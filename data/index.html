@@ -1,59 +1,78 @@
 <!DOCTYPE html>
 <html lang="pt"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="pagina de login, usuario e senha">
-    <meta name="author" content="Kened Oliveira">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="pagina de login, usuario e senha">
+  <meta name="author" content="Kened Oliveira">
 
-    <title>Login</title>
+  <title>Login</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="./text/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap core CSS -->
+  <link href="./text/bootstrap.min.css" rel="stylesheet">
+  <link href="./text/floating-labels.css" rel="stylesheet">
 
-    <!-- Custom styles for this template -->
-    <link href="./text/floating-labels.css" rel="stylesheet">
+  <!-- Custom script -->
+  <script src="./text/jquery.min.js"></script>
+  <script src="./text/bootstrap.min.js"></script>
 
-  </head>
+</head>
 
-  <body>
-    <form class="form-signin">
-      <div class="text-center mb-4">
-        <img class="mb-4" src="./image/AquaSmart.png" alt="" width="278" height="200">
-        <p>Entre com o login e senha cadastrados.<code> Caso seja o primeiro acesso, vá para:</code><a href="http://www.aquasmart.com.br/cadastro"> Cadastro.</a></p>
-      </div>
+<body>
+  <form class="form-signin" onsubmit="quemestaae()">
+    <div class="text-center mb-4">
+      <img class="mb-4" src="./image/AquaSmart.png" alt="" width="278" height="200">
+      <p>Entre com o login e senha cadastrados.<code> Caso seja o primeiro acesso, vá para:</code><a href="http://www.aquasmart.com.br/cadastro"> Cadastro.</a></p>
+    </div>
 
-      <div class="form-label-group">
-        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="">
-        <label for="inputEmail">Endereço de email</label>
-      </div>
+    <div class="form-label-group">
+      <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="">
+      <label for="inputEmail">Endereço de email</label>
+    </div>
 
-      <div class="form-label-group">
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="">
-        <label for="inputPassword">Senha</label>
-      </div>
-      <!-- <div class='col-md-4'>
-        <button type='button submit' name='D8' value='1' class='btn btn-success btn-lg'>
-          ON</button></div>
-          <div class='col-md-4'>
-            <button type='button submit' name='D8' value='0' class='btn btn-danger btn-lg'>
-              OFF</button></div> -->
+    <div class="form-label-group">
+      <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="">
+      <label for="inputPassword">Senha</label>
+    </div>
+    <!-- <p id="demo">hash</p> -->
 
-      <!-- <div id="actions" class="row">
-        <div class="col-md-12">
-          <a href="edit.html" class="btn btn-primary">Editar</a>
-          <a href="index.html" class="btn btn-default">Fechar</a>
-        </div>
-      </div> -->
-      <!-- apagar depois, botão toggle -->
-
-
-      <div class="checkbox mb-3">
-        <label>
-          <input type="checkbox" value="remember-me"> Lembre-me
-        </label>
-      </div>
-      <button class="btn btn-lg btn-info btn-block" type="submit">Entrar</button>
+    <div class="checkbox mb-3">
+      <!-- <label><input type="checkbox" value="remember-me">Lembre-me</label> -->
+      <a href="mainPage.html" class="btn btn-lg btn-info btn-block" >Entrar</a>
+      <!-- <a href="/mainPage.html" class="btn btn-lg btn-info btn-block" type="submit" >Entrar</a> -->
       <p class="mt-5 mb-3 text-muted text-center">© 2017-2018</p>
-    </form>
+    </div>
+  </form>
+
+  <script type="text/javascript">
+  function newXmlHttpRequest() {
+    if (window.XMLHttpRequest) {
+      return new XMLHttpRequest();
+    } else if (window.ActiveXObject) {
+      return new ActiveXObject("Microsoft.XMLHTTP");
+    }
+  }
+
+  function hash(data){
+    var t = data.length;
+    var result = "";
+    for(i=0;i<t;i++){
+      result =result + "" + data.charCodeAt(i);
+    }
+    document.getElementById("demo").innerHTML = result;
+    return result;
+  }
+  function quemestaae(){
+    var data = document.getElementById("inputPassword").value + document.getElementById("inputPassword").value;
+    data = hash(data);
+    var xhttp = newXmlHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var resposta = xmlhttp.responseText;//document.getElementById("Resposta_da_ESP").innerHTML = xmlhttp.responseText;
+      }
+    };
+    xhttp.open("GET", "/login?l="+data, true);
+    xhttp.send();
+  }
+  </script>
 
 </body></html>
