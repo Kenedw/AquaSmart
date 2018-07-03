@@ -30,7 +30,7 @@ function alloff(){
 setInterval(function() {
   // Call a function repetatively with 10 Second interval
   getData();
-}, 30000); //30Seconds update rate
+}, 1000); //1Seconds update rate
 
 setInterval(function() {
   // Call a function repetatively with 10 Second interval
@@ -49,6 +49,7 @@ function getData() {
         Tid += i;
         $(Tid).bootstrapToggle(resposta[i-1]?'on':'off');
       }
+      console.log(resposta);
     }
   };
   xhttp.open("GET", "callback", true);

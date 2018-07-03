@@ -101,6 +101,7 @@ void loop(void){
       }
     }
     time += millis();
+    flag_button = true;
   }
 }
 
